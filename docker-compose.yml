@@ -1,0 +1,25 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=172.22.0.2
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=mydb
+      - DB_POSTGRESDB_USER=myuser
+      - DB_POSTGRESDB_PASSWORD=mypassword
+      - N8N_SECURE_COOKIE=false
+      - NODE_FUNCTION_ALLOW_BUILTIN=*
+      - NODE_FUNCTION_ALLOW_BUILTIN=odoorpc
+    ports:
+      - 5678:5678
+    volumes:
+      - ./n8n_storage:/home/node/.n8n
+      - ./rag:/home/node/data/
+    networks:
+      - ollama_ollama
+
+networks:
+  ollama_ollama:
+    external: true

@@ -1,0 +1,13 @@
+﻿Channel : ,Emplacement,IP,
+,,,
+1,Usinage,10.1.1.67,
+2,Entrée,10.1.1.66,PORT2
+3,Montage,10.1.1.69,
+4,Bureau,10.1.1.68,PORT4
+5,Expédition,10.1.1.70,
+6,SAS,10.1.1.71,
+,,,
+DVR URL :, http://192.168.1.212,,
+Login :,admin,,
+Passwd :,vmsecurite3487,,
+PORT :,37777,,
