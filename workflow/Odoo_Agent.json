@@ -1,0 +1,212 @@
+{
+  "name": "Odoo Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "### CONTEXT\n\nTu est un assistant, tu utilise l'outils Odoo pour répondre aux demandent des utilisateurs.\n\n### ACTION\n\nTu utilise les outils ( Odoo ) afin de consulter la documentation a ta disposition pour répondre.\nTu n'extrapole pas, tu n'invente pas et tu ne déduit pas !\n\nSi la réponse n'est pas aligné avec l'objet de la question, tu répondra que tu ne sais pas !\n\n\n### SORTIE\n\nTu reste concis et précis.\nTes réponses sont les plus courtes possible.\nTu source tes réponses !\nTu utilisera le format approprier en utilisant les puces, paragraphes, tableaux, etc ..\n\nTu t'exprime exclusivement en francais !"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1060,
+        -480
+      ],
+      "id": "0cfcf617-75b5-4bb9-93f0-e1852a253666",
+      "name": "AI Agent",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "content": "## Sources\nhttps://www.youtube.com/watch?v=JjBofKJnYIU\n",
+        "height": 640,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1980,
+        -480
+      ],
+      "id": "79e7abc7-c9dd-4ce0-8770-9b77cc2ef857",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1300,
+        -480
+      ],
+      "id": "b5ed4dfb-6e12-4612-beca-14b06813014e",
+      "name": "When chat message received",
+      "webhookId": "b4ba01cc-3dc5-4221-bba2-052acc534a55"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -960,
+        -240
+      ],
+      "id": "6ca3935d-64af-4bfb-8d16-d11220a5635f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        -220
+      ],
+      "id": "b6950847-7887-4642-b047-88fe3a964651",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "rzR8RPmbeNmWKdF7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "account.account",
+        "operation": "get",
+        "customResourceId": "={{ $fromAI('Custom_Resource_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.odooTool",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        -240
+      ],
+      "id": "5d7f7a76-9d65-4e3b-8774-d47f9c3c3501",
+      "name": "getAll",
+      "credentials": {
+        "odooApi": {
+          "id": "CQOLMxBiOsEPmAqf",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "contactId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Contact_ID', `Utilise l'outil 'allContact' pour récupérer l ID du contact recherché`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.odooTool",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -240
+      ],
+      "id": "bbf33ea7-4428-4e57-a658-f4d142098fa1",
+      "name": "getContact",
+      "credentials": {
+        "odooApi": {
+          "id": "CQOLMxBiOsEPmAqf",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "testAPI",
+        "jsCode": "var odoorpc = require(\"odoorpc\");\nvar database = \"atelierluxus-odoo-master-staging-17-16440147\";\nvar login = \"it.gilles@atelierluxus.com\";\nvar password = \"7c055a635cfe58c3d0d2445b8e816d4bfa43ed85\"\n \nlet configs = {\n    odoo_server: \"https://atelierluxus-odoo-master-staging-17-16440147.dev.odoo.com\",\n    http_auth: \"basic_auth_user:basic_auth_pass\"\n};\nlet odoo = new odoorpc.OdooRPC();\nodoo.init(configs);\n \nlet db_list = odoo.getDbList().then(data => {\n    console.log(data);\n});\n \nodoo.login(database, login, password).then(data => {\n    console.log(data);\n    return JSON.stringify(data);\n});\n// Example: convert the incoming query to uppercase and return it\nreturn query.toUpperCase()"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        -240
+      ],
+      "id": "599e0d55-6839-4b48-b552-37543e471a7b",
+      "name": "testTool"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAll": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "getContact": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "testTool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a71872ef-186b-433e-b901-771b68fa17b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c791bd3945d7fdcde4a6084443549ddf701ab30842b7c70dc0249c5f61162cc"
+  },
+  "id": "tORhB9HQZr7ORjrY",
+  "tags": []
+}

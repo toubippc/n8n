@@ -1,0 +1,383 @@
+{
+  "name": "Network RAG Insert",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "mistral:latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        -200
+      ],
+      "id": "14d9b46b-9a11-43fb-8ce0-5bd9a55eccde",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "rzR8RPmbeNmWKdF7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1240,
+        -200
+      ],
+      "id": "9382a08a-8c43-46e4-98f5-81cda5e2348d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "content": "## Sources\n### Question : \nPour un TBL 150-124, quel est sa sortie maximale de puissance en watt ?\n\n### Réponse : \n150 Watts est la sortie maximale de puissance pour le modèle TBL 150-124.\n\n",
+        "height": 640,
+        "width": 500
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1960,
+        -500
+      ],
+      "id": "26678662-3003-48e3-8d10-1efbf75375c1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        580
+      ],
+      "id": "c6f00926-d276-4a69-9913-92e8bd04ed00",
+      "name": "Embeddings Ollama",
+      "credentials": {
+        "ollamaApi": {
+          "id": "rzR8RPmbeNmWKdF7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {
+          "separator": ","
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        580
+      ],
+      "id": "647c2201-84db-4d5f-8670-75a5ef9227b0",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        760
+      ],
+      "id": "1e1357ba-6778-4714-8b84-4fa7eeae2cda",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/data/*.*",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        320
+      ],
+      "id": "326535f3-2cae-4766-b7b5-6653275ccd5a",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1740,
+        320
+      ],
+      "id": "edcdf5a4-05ff-4a92-832c-a168536eb315",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1660,
+        -660
+      ],
+      "id": "d85fae85-b076-4239-b9b0-e99a384eb0b5",
+      "name": "When chat message received",
+      "webhookId": "5c315452-1df2-41e3-a845-6092e5f9b3e9"
+    },
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        120
+      ],
+      "id": "2a55cb7a-bd40-4480-a363-e2ee47fe018c",
+      "name": "Embeddings Ollama1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "rzR8RPmbeNmWKdF7",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemPromptTemplate": "Tu est un assistant qui seconde l'administrateur réseaux en place. Tu es responsable de la documentation et du support. \nUtilise uniquement les éléments de contexte suivants pour répondre à la question de l'utilisateur.\nTu n'hésitera pas a faire des croisements afin de trouver une réponse !\n\nSi tu ne connais pas la réponse, dit-le simplement, n'essayez pas d'inventer une réponse.\nTu restera précis et concis et tu développera uniquement sur demande !\n\nTu existe afin d'éviter toutes manipulations et recherches donc tu n'en fera pas la suggestion !\n\nTu t'exprimera uniquement en francais, sauf sur demande.\n----------------\n{context}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainRetrievalQa",
+      "typeVersion": 1.4,
+      "position": [
+        -600,
+        -580
+      ],
+      "id": "79450f6b-160e-4c1c-9d8a-97bf2e4bf809",
+      "name": "Question and Answer Chain"
+    },
+    {
+      "parameters": {
+        "topK": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.retrieverVectorStore",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -200
+      ],
+      "id": "49567473-1888-4654-b103-f14ba2e91ea7",
+      "name": "Vector Store Retriever1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1,
+      "position": [
+        -1000,
+        -40
+      ],
+      "id": "1578ce86-4b6d-4978-942a-7dc0c7ce416c",
+      "name": "Postgres PGVector Store",
+      "credentials": {
+        "postgres": {
+          "id": "8g3AHuZrWl3yAWHL",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1,
+      "position": [
+        -1300,
+        320
+      ],
+      "id": "a1626be0-61e4-4e1c-9071-77e7a8a95056",
+      "name": "Postgres PGVector Store1",
+      "credentials": {
+        "postgres": {
+          "id": "8g3AHuZrWl3yAWHL",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1300,
+        -520
+      ],
+      "id": "9cf439d8-0d25-43ec-89db-6a68a8628128",
+      "name": "AI Agent"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Postgres PGVector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Postgres PGVector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Store Retriever1": {
+      "ai_retriever": [
+        []
+      ]
+    },
+    "Postgres PGVector Store": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Vector Store Retriever1",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Question and Answer Chain": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e94d8e32-9a5e-49e8-9667-086ab3f29192",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c791bd3945d7fdcde4a6084443549ddf701ab30842b7c70dc0249c5f61162cc"
+  },
+  "id": "VrtsOmjgONk8KYOG",
+  "tags": []
+}
